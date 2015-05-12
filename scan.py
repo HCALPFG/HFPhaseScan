@@ -114,7 +114,8 @@ class settings:
 
     def shift ( self ):
 
-        log_file = open ( self.log_file_name, "w" ) 
+        log_file = open ( self.log_file_name, "w" )
+        illegal_shift_requested = False
 
         # Loop through the bricks, as defined by delay files
         for brick in self.bricks.bricks:
@@ -153,6 +154,8 @@ class settings:
                 if ( delay_for_ttcrx_k + self.ttcrx.get_rbx_setting ( brick.RBX ) > self.ttcrx_max_delay or
                      delay_for_ttcrx_k + self.ttcrx.get_rbx_setting ( brick.RBX ) < self.ttcrx_min_delay ):
 
+                    illegal_shift_requested = True
+                    
                     log_file.write ( "Illegal TTCrx delay requested for " + brick.RBX + "\n")
                     log_file.write ("\t --> old brick delay bounds = [\t" + str(this_brick_min_delay) + "\t,\t" + str(this_brick_max_delay)+ "\t]\n")
                     log_file.write ("\t --> old ttcrx delay        =  \t" + str(self.ttcrx.get_rbx_setting ( brick.RBX ) ) + "\n")
@@ -165,7 +168,11 @@ class settings:
                 this_brick_min_delay, this_brick_max_delay = brick.get_min_max()
                 print "\t --> new brick delay bounds = [\t", this_brick_min_delay, "\t,\t", this_brick_max_delay, "\t]"
                 print "\t --> new ttcrx delay        =  \t", self.ttcrx.get_rbx_setting ( brick.RBX ), "\n"
-        
+            
+        if illegal_shift_requested :
+            print "\n\n*****************************************************"
+            print "WARNING: Some illegal shifts were requested.  Consult", self.log_file_name
+            print "*****************************************************\n\n"
 class scan_arg_parser:
     def __init__ (self, this_description):
         self.parser = argparse.ArgumentParser(description=this_description)
