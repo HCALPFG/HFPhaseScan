@@ -9,4 +9,6 @@ def delaySettingFiles():
 		"depth1":("Data/test_depth1.root","shift_depth1")
 		}
 
+def mapFile():
+	return "Data/emap.txt"
 
