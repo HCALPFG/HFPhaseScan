@@ -65,3 +65,6 @@ class HFSetting(object):
 
 	def getRBXDelaySetting(self):
 		return self._RBXSetting
+
+	def map(self):
+		return self._map
