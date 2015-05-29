@@ -36,7 +36,6 @@ class DelaySetting(HFSetting):
 		ttcrxFile = minidom.parse(self.ttcrxPath)
 		ttcrxData = ttcrxFile.getElementsByTagName("Data")
 		for datum in ttcrxData:
-			if "HF" not in datum.getAttribute("id"): continue
 			self._hcalRBXSetting[str(datum.getAttribute("id"))] = int(datum.childNodes[0].nodeValue.split(" ")[0])
 
 
@@ -61,14 +60,18 @@ class DelaySetting(HFSetting):
 			successShift = False
 			self._adjustChSetting = {}
 			self._adjustRBXSetting = {}
+
 			# Loop over each RBX
 			for rbxName,RBXDelay in self._hcalRBXSetting.iteritems():
+				if not rbxName.startswith("HF"): 
+					self._adjustRBXSetting[rbxName] = self._hcalRBXSetting[rbxName]
+					continue
 				self._goodChannels = {(coord[1],coord[2],coord[3]):True for coord in self._hcalChSetting if coord[0] == rbxName}
 				self._delayOneChannel = {(coord[1],coord[2],coord[3]):delay for coord,delay in self._hcalChSetting.iteritems() if coord[0] == rbxName}
 
 				# Loop over each channel and check if there is out of bound
 				for channelCoord,currentDelay in self._delayOneChannel.iteritems():
-					if channelCoord[1] == self.HF_CalibRM_number: continue	
+					if channelCoord[1] == self.HF_CalibRM_number: continue
 					if (self._relSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay > self.brick_max_delay) or  (self._relSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay < self.brick_min_delay):  		
 					 	self._goodChannels[channelCoord] = False
 
@@ -100,7 +103,7 @@ class DelaySetting(HFSetting):
 						successShift = all([(adjustShiftWithTTcrx >= self.brick_min_delay) and (adjustShiftWithTTcrx <= self.brick_max_delay) for goodChannel,adjustShiftWithTTcrx in testAdjust.iteritems()  ])
 						if successShift:
 							for coord,currentDelay in self._delayOneChannel.iteritems():
-								if coord[1] != 4:
+								if coord[1] != self.HF_CalibRM_number:
 									self._adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = currentDelay+self._relSetting[(rbxName,coord[0],coord[1],coord[2])]-delay_for_ttcrx_ns
 								else:
 									self._adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = 0
