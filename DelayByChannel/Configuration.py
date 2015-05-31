@@ -15,7 +15,7 @@ def mapFile():
 	return "Data/emap.txt"
 
 def brickDir():
-	return "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/2015-may-26"
+	return "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/2015-may-12"
 
 def TTCPath():
 	return "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/TTCrxPhaseDelayRBX_0x187_tunedHTRs_tuned_v13m.xml"

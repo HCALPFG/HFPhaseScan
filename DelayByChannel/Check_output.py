@@ -3,10 +3,13 @@ import os
 import ROOT as r
 from HFSetting import HFSetting
 
-original_brick_path = "Data/2015-may-26/"
+original_brick_path = "Data/2015-may-12/"
 adjust_brick_path = "test/"
 require_setting_path = "Data/20150528_RelativeTimeShift.root"
 emapFile = "Data/emap.txt"
+plotFileName = "output/20150529_HFPhaseScan.root"
+print_each_channel = False
+makePlot = True
 
 #==============================================================================================
 # Get path for each xml files
@@ -51,7 +54,6 @@ for EtaPhi_channel,RBX_channel in hfSetting.map().iteritems():
 	if RBX_channel[0] not in require_setting:
 		require_setting[RBX_channel[0]] = {}
 	require_setting[RBX_channel[0]][(RBX_channel[1],RBX_channel[2],RBX_channel[3])] = histos[EtaPhi_channel[2]].GetBinContent( histos[EtaPhi_channel[2]].GetXaxis().FindBin(EtaPhi_channel[0]) ,  histos[EtaPhi_channel[2]].GetYaxis().FindBin(EtaPhi_channel[1]))
-	print require_setting[RBX_channel[0]][(RBX_channel[1],RBX_channel[2],RBX_channel[3])]
 
 
 
@@ -59,21 +61,41 @@ for EtaPhi_channel,RBX_channel in hfSetting.map().iteritems():
 # check setting for each channel
 #==============================================================================================
 channel_diff = []
+calibration_check = []
+in_range = []
 for rbxName,channels in original_setting.iteritems():
 	if len(original_setting[rbxName]) != len(adjust_setting[rbxName]):
 		print "number of channels for %s are different for the two settings!"
 	for channel,delay in channels.iteritems():
 		if channel in adjust_setting[rbxName]:
-			print "======================================================"
-			print "%s channel qie %s, rm %s, card %s setting:"%(rbxName,channel[0],channel[1],channel[2])
-			print "original setting: %s"%delay
-			print "adjust setting: %s"%adjust_setting[rbxName][channel]
+			if print_each_channel:
+				print "======================================================"
+				print "%s channel qie %s, rm %s, card %s setting:"%(rbxName,channel[0],channel[1],channel[2])
+				print "original setting: %s"%delay
+				print "adjust setting: %s"%adjust_setting[rbxName][channel]
 			if channel[1] != 4:
-				print "require adjust setting: %s"%require_setting[rbxName][channel]
+				if print_each_channel:
+					print "require adjust setting: %s"%require_setting[rbxName][channel]
 				channel_diff.append((adjust_setting[rbxName][channel] - delay - int(require_setting[rbxName][channel])))
+				in_range.append( adjust_setting[rbxName][channel] <= 24 and adjust_setting[rbxName][channel] >= 0 )  
 			else:
-				print "this is a calibration channel with rm = 4"
+				if print_each_channel:
+					print "this is a calibration channel with rm = 4"
+				calibration_check.append( adjust_setting[rbxName][channel] == 0 and delay == 0 )
+
 		else:
 			print "%s channel qie %s, rm %s, card %s not found in adjust setting"%(channel[0],channel[1],channel[2],channel[3])
 
-print "Are all the setting consistent? ", all([diff == 0 for diff in channel_diff])
+
+#==============================================================================================
+# make plot for global shift number
+#==============================================================================================
+plotFile = r.TFile(plotFileName,"RECREATE")
+delay_hist = r.TH2F("delay_hist","Delay Distribution for all channels ; [ns] ; ",100,-50,50)
+
+
+
+
+print "Are all the non-calibration setting consistent? ", all([diff == 0 for diff in channel_diff])
+print "Are all non-calibration setting in range? ", all(in_range)
+print "Are all the calibration setting zero? ", all(calibration_check)
