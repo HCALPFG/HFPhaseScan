@@ -4,10 +4,10 @@ import ROOT as r
 from HFSetting import HFSetting
 
 original_brick_path = "Data/2015-may-12/"
-adjust_brick_path = "test/"
+adjust_brick_path = "2015-june-1_Delays_5050/"
 require_setting_path = "Data/20150528_RelativeTimeShift.root"
 emapFile = "Data/emap.txt"
-plotFileName = "output/20150529_HFPhaseScan.root"
+plotFileName = "output/20150531_HFPhaseScan.root"
 print_each_channel = False
 makePlot = True
 
@@ -90,8 +90,8 @@ for rbxName,channels in original_setting.iteritems():
 #==============================================================================================
 # make plot for global shift number
 #==============================================================================================
-plotFile = r.TFile(plotFileName,"RECREATE")
-delay_hist = r.TH2F("delay_hist","Delay Distribution for all channels ; [ns] ; ",100,-50,50)
+# plotFile = r.TFile(plotFileName,"RECREATE")
+# delay_hist = r.TH2F("delay_hist","Delay Distribution for all channels ; [ns] ; ",100,-50,50)
 
 
 
