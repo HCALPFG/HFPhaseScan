@@ -57,7 +57,7 @@ if __name__ == "__main__":
 	a.readDelayFromHisto(delaySettingFiles())
 	a.adjustTiming()
 	test = XMLProducer()
-	test.produce(a,"2015-may-27_HCAL_Delays_Test","09-02-14","All30","TTcrx_DELAY.xml","/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/test/")
+	test.produce(a,"2015-june-1_HCAL_Delays","01-06-15","All30","TTcrx_DELAY.xml","/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/2015-june-1_Delays/")
 
 		
 
