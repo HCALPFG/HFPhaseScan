@@ -2,13 +2,20 @@ import os
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from DelaySetting import DelaySetting
-from Configuration import delaySettingFiles,mapFile,brickDir,TTCPath
 from XMLProducer import XMLProducer
 
 
-delaySetting = DelaySetting(brickDir(),TTCPath(),mapFile())
+inputBrickPath = "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/20150521_HFPhaseScan_Shift0_Edmund/delay/"
+inputTTCRXPath = "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/20150521_HFPhaseScan_Shift0_Edmund/ttcrx.xml"
+mapPath = "Data/2015-may-4_HCALmapHBEF_G_uHTR.txt"
+
+# relativeTimingPath = "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/Data/20150608_HFRelativeTiming.txt"
+relativeTimingPath = {"depth1":("Data/20150528_RelativeTimeShift.root","shift_depth1"),"depth2":("Data/20150528_RelativeTimeShift.root","shift_depth2")}
+outputPath = "/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/output/HFPhaseScan_June13-2015_5050/"
+
+delaySetting = DelaySetting(inputBrickPath,inputTTCRXPath,mapPath)
 delaySetting.readDelayFromXML()
-delaySetting.readDelayFromHisto(delaySettingFiles())
+delaySetting.readDelayFromHisto(relativeTimingPath)
 delaySetting.adjustTiming()
 producer = XMLProducer()
-producer.produce(a,"2015-june-3_HCAL_Delays","03-06-15","All30","TTcrx_DELAY.xml","/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/HFPhaseScan_June03-2015/5050")
+producer.produce(delaySetting,"2015-june-12_HCAL_Delays","12-06-15","All30","ttcrx.xml",outputPath)
