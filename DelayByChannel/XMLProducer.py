@@ -12,7 +12,7 @@ class XMLProducer(object):
 		if not os.path.isdir(outDirPath):
 			os.mkdir(outDirPath,0755)
 
-		chDelaySetting,RBXDelaySetting = delaySetting.adjustSetting()
+		chDelaySetting,RBXDelaySetting = delaySetting.getAdjustSetting()
 
 		for channel,adjustDelay in chDelaySetting.iteritems():
 			if channel[0] not in self.xmlData:
@@ -40,7 +40,7 @@ class XMLProducer(object):
 		ET.SubElement(bricks,"Parameter",name="TAG",type="string").text = ttcrxTag
 		ET.SubElement(bricks,"Parameter",name="DATACLASS",type="string").text = "TTCRXPHASE"
 		for rbxName,delay in RBXDelaySetting.iteritems():
-			ET.SubElement(bricks,"Data",elements="3",encoding="dec",id=rbxName).text = "%s 0 0"%delay
+			ET.SubElement(bricks,"Data",elements="3",encoding="dec",id=rbxName).text = RBXDelaySetting[rbxName]
 		ttcrxFile = open(outDirPath+ttcrxFileName,"w")
 		ttcrxFile.write(minidom.parseString(ET.tostring(ttcrx)).toprettyxml())
 		ttcrxFile.close()
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 	a.readDelayFromHisto(delaySettingFiles())
 	a.adjustTiming()
 	test = XMLProducer()
-	test.produce(a,"2015-june-1_HCAL_Delays","01-06-15","All30","TTcrx_DELAY.xml","/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/2015-june-1_Delays/")
+	test.produce(a,"2015-june-1_HCAL_Delays","01-06-15","All30","TTcrx_DELAY.xml","/afs/cern.ch/work/k/klo/hcal/PromptAnalysis/HFPhaseScan/DelayByChannel/2015-june-1_Delays/5050/")
 
 		
 
