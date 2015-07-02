@@ -1,4 +1,3 @@
-from Configuration import delaySettingFiles,mapFile,brickDir,TTCPath
 from HFSetting import HFSetting
 import ROOT as r
 import os
@@ -76,12 +75,12 @@ class DelaySetting(HFSetting):
 
 	def adjustTiming(self):
 		if hasattr(self,"currentRBXSetting") and hasattr(self,"currentChSetting") and hasattr(self,"addSetting"):
-			successShift = False
 			self.adjustChSetting = {}
 			self.adjustRBXSetting = {}
 
 			# Loop over each RBX
 			for rbxName,RBXDelay in self.currentRBXSetting.iteritems():
+				successShift = False
 				if not rbxName.startswith("HF"): 
 					self.adjustRBXSetting[rbxName] = self.currentRBXSetting[rbxName]
 					continue
@@ -104,6 +103,8 @@ class DelaySetting(HFSetting):
 						if not isGood:
 							print "RBX: {0}, QIE: {1}, RM: {2}, Card: {3};".format(rbxName,*channelCoord)+" Current Delay: {0}, Request Delay: {1}".format(allDelayForOneRBX[channelCoord],self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] )
 							listBadChannels.append(channelCoord)
+					print  "=============================="
+
 
 
 				
@@ -115,10 +116,10 @@ class DelaySetting(HFSetting):
 						else:
 							delay_for_ttcrx_ns = requiredShift - self.brick_min_delay
 						delay_for_ttcrx_nk = int(round(float(delay_for_ttcrx_ns) / self.ttcrx_step_time_ns) - .5) + (float(delay_for_ttcrx_ns) / self.ttcrx_step_time_ns > 0)
-						delay_for_ttcrx_k = delay_for_ttcrx_k*self.ttcrx_step_time_ns
+						delay_for_ttcrx_k = delay_for_ttcrx_nk*self.ttcrx_step_time_ns
 	
 						# Check if this delay for ttcrx is compatible with the rest
-						testAdjust = {goodChannel: allDelayForOneRBX[goodChannel]-delay_for_ttcrx_ns + self.addSetting[(rbxName,goodChannel[0],goodChannel[1],goodChannel[2])]   for goodChannel,isGood in goodChannels.iteritems() if isGood }
+						testAdjust = {otherChannel: allDelayForOneRBX[otherChannel]-delay_for_ttcrx_ns + self.addSetting[(rbxName,otherChannel[0],otherChannel[1],otherChannel[2])]   for otherChannel in allDelayForOneRBX  if otherChannel != badChannel }
 						successShift = all([(adjustShiftWithTTcrx >= self.brick_min_delay) and (adjustShiftWithTTcrx <= self.brick_max_delay) for goodChannel,adjustShiftWithTTcrx in testAdjust.iteritems()  ])
 						if successShift:
 							for coord,currentDelay in allDelayForOneRBX.iteritems():
@@ -139,7 +140,21 @@ class DelaySetting(HFSetting):
 					successShift = True
 
 				if not successShift:
-					print "WARNING! Illegal delays have been requested!"
+					print "WARNING! Illegal delays have been requested! The current setting can't accomodate the required changes. Setting the delay setting to max or min ({0} or {1}) instead".format(self.brick_max_delay,self.brick_min_delay)
+					for coord, currentDelay in allDelayForOneRBX.iteritems():	
+						if coord not in listBadChannels and coord[1] != self.HF_CalibRM_number:
+							self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = currentDelay+self.addSetting[(rbxName,coord[0],coord[1],coord[2])]
+						elif coord in listBadChannels:
+							print "RBX: {0}, QIE: {1}, RM: {2}, Card: {3};".format(rbxName,*coord)+ "Current Delay: {0}, Request Delay: {1} ".format(currentDelay,self.addSetting[(rbxName,coord[0],coord[1],coord[2])])
+							if (currentDelay+self.addSetting[(rbxName,coord[0],coord[1],coord[2])] > self.brick_max_delay):
+								self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] =  self.brick_max_delay
+								print "Set to {0}".format(self.brick_max_delay)
+							elif (currentDelay+self.addSetting[rbxname,coord[0],coord[1],coord[2]] < self.brick_min_delay):
+								self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] =  self.brick_min_delay
+								print "Set to {0}".format(self.brick_min_delay)
+						elif coord[1] == self.HF_CalibRM_number:
+							self.adjustRBXSetting[rbxName] = 0
+						self.adjustRBXSetting[rbxName] = self.currentRBXSetting[rbxName]
 
 
 
