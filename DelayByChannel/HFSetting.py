@@ -6,6 +6,7 @@ class HFSetting(object):
 
 		self.channel_EtaPhiCoord = {}
 		self.map = {}
+		self.inverse_map = {}
 		self.channel_RBXCoord = {}
 
 		for line in self._file:
@@ -15,13 +16,20 @@ class HFSetting(object):
 			ieta = int(fieldList[2])
 			iphi = int(fieldList[3])
 			depth = int(fieldList[5])
-			subDet = fieldList[7][:3]
-			self.channel_EtaPhiCoord[(ieta,iphi,depth,subDet)] = ""
+			subDet = fieldList[7][:3]	
 			rbx = fieldList[7]
 			qie = int(fieldList[12])
 			rm = int(fieldList[9])
 			cand = int(fieldList[11])
-			self.map[(ieta,iphi,depth,subDet)] = (rbx,qie,rm,cand)
+			if subDet.startswith("HFP"):
+				self.channel_EtaPhiCoord[(ieta,iphi,depth,subDet)] = ""
+				self.map[(ieta,iphi,depth,subDet)] = (rbx,qie,rm,cand)
+				self.inverse_map[ (rbx,qie,rm,cand) ] = (ieta,iphi,depth,subDet)
+			elif subDet.startswith("HFM"):
+				self.channel_EtaPhiCoord[(ieta*-1,iphi,depth,subDet)] = ""
+				self.map[(ieta*-1,iphi,depth,subDet)] = (rbx,qie,rm,cand)
+				self.inverse_map[ (rbx,qie,rm,cand) ] = (ieta*-1,iphi,depth,subDet)
+
 			self.channel_RBXCoord[(rbx,qie,rm,cand)] = ""
 
 	def __iter__(self):
