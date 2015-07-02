@@ -2,7 +2,6 @@ import os
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from DelaySetting import DelaySetting
-from Configuration import delaySettingFiles,mapFile,brickDir,TTCPath
 
 class XMLProducer(object):
 	def __init__(self):
