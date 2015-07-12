@@ -70,7 +70,7 @@ class DelaySetting(HFSetting):
 			histName = inputInfo[1]
 			depthNumber = int(depth[-1])
 			self._files[depthNumber] = r.TFile(fileName,"READ")
-			self._hists[depthNumber] = self._fles[depthNumber].Get(histName)
+			self._hists[depthNumber] = self._flles[depthNumber].Get(histName)
 
 		for coord in self.channel_EtaPhiCoord:
 			delay = self._hists[coord[2]].GetBinContent(self._hists[coord[2]].GetXaxis().FindBin(coord[0]) ,self._hists[coord[2]].GetYaxis().FindBin(coord[1]) )
