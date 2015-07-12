@@ -18,6 +18,9 @@ class XMLProducer(object):
 				self.xmlData[channel[0]] = []
 			self.xmlData[channel[0]].append((channel[1],channel[2],channel[3],adjustDelay))
 
+		for RBX,channelData in self.xmlData.iteritems():
+			channelData.sort()
+
 		# Produce xml for each RBX
 		for RBX,channelData in self.xmlData.iteritems():
 			brick = ET.Element("CFGBrick")
