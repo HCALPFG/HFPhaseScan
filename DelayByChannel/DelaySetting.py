@@ -53,7 +53,10 @@ class DelaySetting(HFSetting):
 			elif ieta < 0:
 				subDet = "HFM"
 			delay = float(fieldList[3])
-			self.addSetting[self.getRBXCoords(abs(ieta),iphi,depth,subDet)] = delay
+			# print ieta,iphi,depth,subDet
+			# print self.getRBXCoords(ieta,iphi,depth,subDet)
+			# print delay,round(delay)
+			self.addSetting[self.getRBXCoords(ieta,iphi,depth,subDet)] = round(delay)
 
 
 
@@ -67,11 +70,11 @@ class DelaySetting(HFSetting):
 			histName = inputInfo[1]
 			depthNumber = int(depth[-1])
 			self._files[depthNumber] = r.TFile(fileName,"READ")
-			self._hists[depthNumber] = self._files[depthNumber].Get(histName)
+			self._hists[depthNumber] = self._fles[depthNumber].Get(histName)
 
 		for coord in self.channel_EtaPhiCoord:
 			delay = self._hists[coord[2]].GetBinContent(self._hists[coord[2]].GetXaxis().FindBin(coord[0]) ,self._hists[coord[2]].GetYaxis().FindBin(coord[1]) )
-			self.addSetting[self.getRBXCoords(*coord)] = int(delay)
+			self.addSetting[self.getRBXCoords(*coord)] = round(delay)
 
 	def adjustTiming(self):
 		if hasattr(self,"currentRBXSetting") and hasattr(self,"currentChSetting") and hasattr(self,"addSetting"):
@@ -90,6 +93,11 @@ class DelaySetting(HFSetting):
 				# Loop over each channel and check if there is out of bound
 				for channelCoord,currentDelay in allDelayForOneRBX.iteritems():
 					if channelCoord[1] == self.HF_CalibRM_number: continue
+					if (rbxName,channelCoord[0],channelCoord[1],channelCoord[2]) not in self.addSetting:
+						print "Missing info to adjust setting for the channel ",(rbxName,channelCoord[0],channelCoord[1],channelCoord[2]), " or ", self.inverse_map[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])]
+						print "Will not adjust setting of this channel"
+						self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] = 0.
+						continue
 					if (self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay > self.brick_max_delay) or  (self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay < self.brick_min_delay):  		
 					 	goodChannels[channelCoord] = False
 
