@@ -127,7 +127,7 @@ class DelaySetting(HFSetting):
 						delay_for_ttcrx_k = delay_for_ttcrx_nk*self.ttcrx_step_time_ns
 	
 						# Check if this delay for ttcrx is compatible with the rest
-						testAdjust = {otherChannel: allDelayForOneRBX[otherChannel]-delay_for_ttcrx_ns + self.addSetting[(rbxName,otherChannel[0],otherChannel[1],otherChannel[2])]   for otherChannel in allDelayForOneRBX  if otherChannel != badChannel }
+						testAdjust = {otherChannel: allDelayForOneRBX[otherChannel]-delay_for_ttcrx_ns + self.addSetting[(rbxName,otherChannel[0],otherChannel[1],otherChannel[2])]   for otherChannel in allDelayForOneRBX  if otherChannel != badChannel and otherChannel[1] != self.HF_CalibRM_number }
 						successShift = all([(adjustShiftWithTTcrx >= self.brick_min_delay) and (adjustShiftWithTTcrx <= self.brick_max_delay) for goodChannel,adjustShiftWithTTcrx in testAdjust.iteritems()  ])
 						if successShift:
 							for coord,currentDelay in allDelayForOneRBX.iteritems():
@@ -135,7 +135,7 @@ class DelaySetting(HFSetting):
 									self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = currentDelay+self.addSetting[(rbxName,coord[0],coord[1],coord[2])]-delay_for_ttcrx_ns
 								else:
 									self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = 0
-							self.adjustRBXSetting[rbxName] = " ".join([int(delay_for_ttcrx_k),self.currentRBXSetting[rbxName].split(" ")[1],self.currentRBXSetting[rbxName].split(" ")[1]])
+							self.adjustRBXSetting[rbxName] = " ".join([str(int(delay_for_ttcrx_k)),self.currentRBXSetting[rbxName].split(" ")[1],self.currentRBXSetting[rbxName].split(" ")[1]])
 
 
 				else:
