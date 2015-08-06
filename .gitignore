@@ -1,0 +1,8 @@
+*.swo
+*.swp
+*.swk
+*.swl
+*.swn
+*.swm
+*.pyc
+output/
