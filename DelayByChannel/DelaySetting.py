@@ -18,7 +18,8 @@ class DelaySetting(HFSetting):
 		self.brick_width = 25
 		self.ttcrx_min_delay = 0
 		self.ttcrx_max_delay = 225
-		self.ttcrx_step_time_ns = 15
+		self.ttcrx_step_time_ns = 1.56
+		self.ttcrx_step_value = 15
 
 	def readDelayFromXML(self):
 		self.currentRBXSetting = {}
@@ -94,8 +95,8 @@ class DelaySetting(HFSetting):
 				for channelCoord,currentDelay in allDelayForOneRBX.iteritems():
 					if channelCoord[1] == self.HF_CalibRM_number: continue
 					if (rbxName,channelCoord[0],channelCoord[1],channelCoord[2]) not in self.addSetting:
-						print "Missing info to adjust setting for the channel ",(rbxName,channelCoord[0],channelCoord[1],channelCoord[2]), " or ", self.inverse_map[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])]
-						print "Will not adjust setting of this channel"
+						#print "Missing info to adjust setting for the channel ",(rbxName,channelCoord[0],channelCoord[1],channelCoord[2]), " or ", self.inverse_map[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])]
+						#print "Will not adjust setting of this channel"
 						self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] = 0.
 						continue
 					if (self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay > self.brick_max_delay) or  (self.addSetting[(rbxName,channelCoord[0],channelCoord[1],channelCoord[2])] + currentDelay < self.brick_min_delay):  		
@@ -124,7 +125,7 @@ class DelaySetting(HFSetting):
 						else:
 							delay_for_ttcrx_ns = requiredShift - self.brick_min_delay
 						delay_for_ttcrx_nk = int(round(float(delay_for_ttcrx_ns) / self.ttcrx_step_time_ns) - .5) + (float(delay_for_ttcrx_ns) / self.ttcrx_step_time_ns > 0)
-						delay_for_ttcrx_k = delay_for_ttcrx_nk*self.ttcrx_step_time_ns
+						delay_for_ttcrx_k = delay_for_ttcrx_nk*self.ttcrx_step_value
 	
 						# Check if this delay for ttcrx is compatible with the rest
 						testAdjust = {otherChannel: allDelayForOneRBX[otherChannel]-delay_for_ttcrx_ns + self.addSetting[(rbxName,otherChannel[0],otherChannel[1],otherChannel[2])]   for otherChannel in allDelayForOneRBX  if otherChannel != badChannel and otherChannel[1] != self.HF_CalibRM_number }
@@ -132,10 +133,11 @@ class DelaySetting(HFSetting):
 						if successShift:
 							for coord,currentDelay in allDelayForOneRBX.iteritems():
 								if coord[1] != self.HF_CalibRM_number:
-									self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = currentDelay+self.addSetting[(rbxName,coord[0],coord[1],coord[2])]-delay_for_ttcrx_ns
+									self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = currentDelay+self.addSetting[(rbxName,coord[0],coord[1],coord[2])]-int(round(delay_for_ttcrx_ns))
 								else:
 									self.adjustChSetting[(rbxName,coord[0],coord[1],coord[2])] = 0
-							self.adjustRBXSetting[rbxName] = " ".join([str(int(delay_for_ttcrx_k)),self.currentRBXSetting[rbxName].split(" ")[1],self.currentRBXSetting[rbxName].split(" ")[1]])
+							delay_for_ttcrx = int(self.currentRBXSetting[rbxName].split(" ")[0]) + delay_for_ttcrx_k
+							self.adjustRBXSetting[rbxName] = " ".join([str(int(delay_for_ttcrx)),self.currentRBXSetting[rbxName].split(" ")[1],self.currentRBXSetting[rbxName].split(" ")[2]])
 
 
 				else:
